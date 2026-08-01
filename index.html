@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GLAM NOIR | Digital Journal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Plus+Jakarta+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #050508;
+            --card-bg: rgba(18, 16, 26, 0.75);
+            --card-border: rgba(255, 0, 127, 0.25);
+            --neon-pink: #ff007f;
+            --neon-purple: #9d00ff;
+            --neon-cyan: #00f3ff;
+            --text-main: #f3f3f6;
+            --text-muted: #a0a0b8;
+            --glow: 0 0 15px rgba(255, 0, 127, 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+            padding: 20px 15px 80px 15px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Background Media Layer */
+        #bg-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -2;
+            overflow: hidden;
+            background: radial-gradient(circle at center, #1a0b2e 0%, #050508 100%);
+        }
+
+        #bg-container img, #bg-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.35;
+            filter: saturate(140%) contrast(110%);
+        }
+
+        .overlay-dim {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(180deg, rgba(5,5,8,0.6) 0%, rgba(5,5,8,0.9) 100%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* App Container */
+        .app-wrapper {
+            max-width: 500px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 15px 0 5px 0;
+        }
+
+        header h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 2.2rem;
+            letter-spacing: 4px;
+            background: linear-gradient(135deg, #fff 20%, var(--neon-pink) 60%, var(--neon-purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(255, 0, 127, 0.3);
+            text-transform: uppercase;
+        }
+
+        header p {
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            color: var(--neon-cyan);
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        /* Card Styles */
+        .glam-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 0 1px 1px rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .glam-card h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.1rem;
+            letter-spacing: 1.5px;
+            color: var(--text-main);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .glam-card h2 span {
+            color: var(--neon-pink);
+        }
+
+        /* Custom File Upload */
+        .theme-upload-btn {
+            display: inline-block;
+            padding: 8px 14px;
+            background: rgba(255, 0, 127, 0.15);
+            border: 1px solid var(--neon-pink);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            text-align: center;
+            transition: 0.2s ease;
+        }
+
+        .theme-upload-btn:active {
+            transform: scale(0.96);
+            background: var(--neon-pink);
+        }
+
+        #mediaInput { display: none; }
+
+        /* Recovery Tracker */
+        .tracker-grid {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 14px;
+            padding: 15px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .days-count {
+            font-family: 'Cinzel', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--neon-pink);
+            text-shadow: 0 0 10px rgba(255, 0, 127, 0.5);
+        }
+
+        .tracker-btn {
+            background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+            border: none;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            box-shadow: var(--glow);
+            cursor: pointer;
+        }
+
+        /* Inputs & Textareas */
+        textarea, input[type="text"] {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px;
+            color: #fff;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+            margin-top: 8px;
+            resize: none;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus, input[type="text"]:focus {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 8px rgba(0, 243, 255, 0.3);
+        }
+
+        /* Interactive Prompts */
+        .prompt-box {
+            font-style: italic;
+            color: var(--neon-cyan);
+            font-size: 0.85rem;
+            background: rgba(0, 243, 255, 0.05);
+            border-left: 3px solid var(--neon-cyan);
+            padding: 10px 12px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 10px;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            margin-top: 6px;
+            transition: 0.2s;
+        }
+
+        .btn-secondary:active {
+            background: var(--neon-cyan);
+            color: #000;
+        }
+
+        /* Action Buttons */
+        .btn-primary {
+            width: 100%;
+            background: linear-gradient(90deg, var(--neon-pink), var(--neon-purple));
+            border: none;
+            color: white;
+            padding: 14px;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: var(--glow);
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        /* Export Button */
+        .btn-export {
+            width: 100%;
+            background: rgba(0, 243, 255, 0.1);
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.2s;
+        }
+
+        .btn-export:active {
+            background: var(--neon-cyan);
+            color: #000;
+        }
+
+        /* Saved Log Feed */
+        .entry-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 3px solid var(--neon-pink);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+        }
+
+        .entry-date {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="bg-container"></div>
+    <div class="overlay-dim"></div>
+
+    <div class="app-wrapper">
+        <!-- Header -->
+        <header>
+            <h1>Glam Noir</h1>
+            <p>Sanctuary &amp; Reflection</p>
+        </header>
+
+        <!-- Custom Wallpaper Module -->
+        <div class="glam-card" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h2 style="margin: 0;"><span>✦</span> Aesthetic</h2>
+                <p style="font-size: 0.75rem; color: var(--text-muted);">Customize background</p>
+            </div>
+            <label class="theme-upload-btn">
+                Upload Media
+                <input type="file" id="mediaInput" accept="image/*,video/*" onchange="handleMediaUpload(event)">
+            </label>
+        </div>
+
+        <!-- Recovery Module -->
+        <div class="glam-card">
+            <h2><span>✦</span> Recovery Counter</h2>
+            <div class="tracker-grid">
+                <div>
+                    <div class="days-count" id="streakDisplay">0</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">CONSECUTIVE DAYS</div>
+                </div>
+                <button class="tracker-btn" onclick="incrementStreak()">+ Add Day</button>
+            </div>
+        </div>
+
+        <!-- Faith & Spirit Module -->
+        <div class="glam-card">
+            <h2><span>✦</span> Faith &amp; Spirit</h2>
+            <div class="prompt-box" id="dailyVerse">
+                "Light shines in the darkness, and the darkness has not overcome it."
+            </div>
+            <textarea id="prayerInput" rows="2" placeholder="Record a prayer, verse, or quiet reflection..."></textarea>
+        </div>
+
+        <!-- Daily Gratitude -->
+        <div class="glam-card">
+            <h2><span>✦</span> Gratitude</h2>
+            <input type="text" id="grat1" placeholder="1. What lit up your day?">
+            <input type="text" id="grat2" placeholder="2. A small victory...">
+            <input type="text" id="grat3" placeholder="3. Someone or something appreciated...">
+        </div>
+
+        <!-- AI Reflection Prompt Generator & Journal -->
+        <div class="glam-card">
+            <h2><span>✦</span> Reflection</h2>
+            <div class="prompt-box" id="reflectionPrompt">
+                Tap below to generate a deep reflection prompt...
+            </div>
+            <button class="btn-secondary" onclick="generatePrompt()">New Prompt</button>
+            <textarea id="journalEntry" rows="4" placeholder="Write freely here..."></textarea>
+            
+            <button class="btn-primary" onclick="saveEntry()">Save Daily Journal</button>
+        </div>
+
+        <!-- Cloud & File Backup Export -->
+        <div class="glam-card">
+            <h2><span>✦</span> Backup &amp; Save</h2>
+            <p style="font-size: 0.75rem; color: var(--text-muted);">Export your journal logs directly to Google Drive or your phone's storage.</p>
+            <button class="btn-export" onclick="exportDataToCloudOrFiles()">📁 Save to Drive / Files</button>
+        </div>
+
+        <!-- Recent Entries Feed -->
+        <div class="glam-card">
+            <h2><span>✦</span> Past Entries</h2>
+            <div id="entriesFeed"></div>
+        </div>
+    </div>
+
+    <script>
+        // Load Saved State On App Start
+        document.addEventListener("DOMContentLoaded", () => {
+            loadStreak();
+            loadSavedMedia();
+            renderEntries();
+        });
+
+        // 1. Recovery Tracker Logic
+        function loadStreak() {
+            const streak = localStorage.getItem("glam_streak") || 0;
+            document.getElementById("streakDisplay").innerText = streak;
+        }
+
+        function incrementStreak() {
+            let streak = parseInt(localStorage.getItem("glam_streak") || 0);
+            streak += 1;
+            localStorage.setItem("glam_streak", streak);
+            document.getElementById("streakDisplay").innerText = streak;
+        }
+
+        // 2. Custom Media Background Loader
+        function handleMediaUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const result = e.target.result;
+                localStorage.setItem("glam_bg_media", result);
+                localStorage.setItem("glam_bg_type", file.type);
+                applyBackground(result, file.type);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function applyBackground(src, type) {
+            const container = document.getElementById("bg-container");
+            container.innerHTML = "";
+
+            if (type.startsWith("video/")) {
+                const video = document.createElement("video");
+                video.src = src;
+                video.autoplay = true;
+                video.loop = true;
+                video.muted = true;
+                video.playsInline = true;
+                container.appendChild(video);
+            } else {
+                const img = document.createElement("img");
+                img.src = src;
+                container.appendChild(img);
+            }
+        }
+
+        function loadSavedMedia() {
+            const src = localStorage.getItem("glam_bg_media");
+            const type = localStorage.getItem("glam_bg_type");
+            if (src && type) {
+                applyBackground(src, type);
+            }
+        }
+
+        // 3. Prompt Generator
+        const prompts = [
+            "What emotion did you feel most today, and what triggered it?",
+            "What is one piece of baggage you are ready to leave behind tonight?",
+            "How did you honor your personal boundaries today?",
+            "Describe a moment today where you felt completely at peace.",
+            "What would your future self tell you about your current situation?"
+        ];
+
+        function generatePrompt() {
+            const random = prompts[Math.floor(Math.random() * prompts.length)];
+            document.getElementById("reflectionPrompt").innerText = random;
+        }
+
+        // 4. Save Entry LocalStorage Logic
+        function saveEntry() {
+            const prayer = document.getElementById("prayerInput").value.trim();
+            const g1 = document.getElementById("grat1").value.trim();
+            const g2 = document.getElementById("grat2").value.trim();
+            const g3 = document.getElementById("grat3").value.trim();
+            const reflection = document.getElementById("journalEntry").value.trim();
+
+            if (!prayer && !g1 && !reflection) {
+                alert("Please fill out at least one section before saving.");
+                return;
+            }
+
+            const entry = {
+                id: Date.now(),
+                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                prayer: prayer,
+                gratitude: [g1, g2, g3].filter(Boolean),
+                reflection: reflection
+            };
+
+            let entries = JSON.parse(localStorage.getItem("glam_entries") || "[]");
+            entries.unshift(entry);
+            localStorage.setItem("glam_entries", JSON.stringify(entries));
+
+            // Reset Fields
+            document.getElementById("prayerInput").value = "";
+            document.getElementById("grat1").value = "";
+            document.getElementById("grat2").value = "";
+            document.getElementById("grat3").value = "";
+            document.getElementById("journalEntry").value = "";
+
+            renderEntries();
+            alert("Entry saved to Glam Noir storage!");
+        }
+
+        function renderEntries() {
+            const feed = document.getElementById("entriesFeed");
+            const entries = JSON.parse(localStorage.getItem("glam_entries") || "[]");
+
+            if (entries.length === 0) {
+                feed.innerHTML = `<p style="font-size: 0.75rem; color: var(--text-muted); text-align: center;">No saved entries yet.</p>`;
+                return;
+            }
+
+            feed.innerHTML = entries.map(e => `
+                <div class="entry-card">
+                    <div class="entry-date">${e.date}</div>
+                    ${e.prayer ? `<p><strong>Prayer:</strong> ${e.prayer}</p>` : ''}
+                    ${e.gratitude.length ? `<p><strong>Gratitude:</strong> ${e.gratitude.join(", ")}</p>` : ''}
+                    ${e.reflection ? `<p style="margin-top:4px;">${e.reflection}</p>` : ''}
+                </div>
+            `).join('');
+        }
+
+        // 5. Cloud & Files Export Feature
+        async function exportDataToCloudOrFiles() {
+            const entries = localStorage.getItem("glam_entries") || "[]";
+            const streak = localStorage.getItem("glam_streak") || "0";
+
+            const backupData = {
+                exportDate: new Date().toISOString(),
+                streakDays: streak,
+                journalEntries: JSON.parse(entries)
+            };
+
+            const dataString = JSON.stringify(backupData, null, 2);
+            const blob = new Blob([dataString], { type: 'application/json' });
+            const file = new File([blob], `glam_noir_backup_${Date.now()}.json`, { type: 'application/json' });
+
+            // Try opening native Android Share Sheet (Google Drive, Files, etc.)
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({
+                        files: [file],
+                        title: 'GLAM NOIR Backup',
+                        text: 'My GLAM NOIR Digital Journal Backup File'
+                    });
+                } catch (err) {
+                    console.log('Share canceled or failed', err);
+                }
+            } else {
+                // Fallback direct browser download trigger
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `glam_noir_backup.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+        }
+    </script>
+</body>
+</html>
