@@ -1,9 +1,13 @@
+Here is the complete updated master code. Each page in your college-ruled notebook now includes its own **Page Font** dropdown selector.
+When you flip between pages, the text area automatically updates to display whatever font you assigned to that specific page (handwritten cursive, sleek modern, dramatic serif, etc.), alongside your page-specific music track and custom sticker placements.
+### Master Code (index.html)
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GLAM NOIR | Complete Digital Journal Sanctuary</title>
+    <title>GLAM NOIR | Digital Sanctuary & Interactive Notebook</title>
     <!-- Custom Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Cinzel:wght@500;700;900&family=Great+Vibes&family=Orbitron:wght@500;700&family=Playfair+Display:ital,wght@0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;600&display=swap" rel="stylesheet">
     
@@ -192,7 +196,7 @@
             cursor: pointer;
         }
 
-        #mediaInput, #musicInput, #stickerInput, #importFileInput { display: none; }
+        #mediaInput, #musicInput, #stickerInput, #importFileInput, #pageMusicInput, #pageStickerInput { display: none; }
 
         /* Recovery Tracker */
         .tracker-grid {
@@ -410,6 +414,112 @@
             font-size: 0.75rem;
             text-transform: uppercase;
         }
+
+        /* ========================================= */
+        /* COLLEGE RULED INTERACTIVE NOTEBOOK SECTION */
+        /* ========================================= */
+        .notebook-container {
+            background: #fdfbf7;
+            color: #1a1a2e;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset -4px 0 10px rgba(0,0,0,0.1);
+            position: relative;
+            padding: 20px 20px 20px 50px;
+            min-height: 420px;
+            overflow: hidden;
+            border-left: 12px solid #8b0000;
+        }
+
+        .notebook-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 45px;
+            width: 2px;
+            background: rgba(239, 68, 68, 0.6);
+            z-index: 1;
+        }
+
+        .notebook-page-paper {
+            width: 100%;
+            height: 100%;
+            min-height: 380px;
+            background-image: repeating-linear-gradient(
+                transparent,
+                transparent 27px,
+                rgba(59, 130, 246, 0.3) 28px
+            );
+            line-height: 28px;
+            position: relative;
+        }
+
+        .notebook-textarea {
+            width: 100%;
+            height: 340px;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            color: #1a1a2e !important;
+            font-family: 'Caveat', cursive, var(--app-font);
+            font-size: 1.25rem !important;
+            line-height: 28px !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            outline: none;
+            resize: none;
+            z-index: 2;
+            position: relative;
+        }
+
+        .notebook-sticker-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .placed-sticker {
+            position: absolute;
+            pointer-events: auto;
+            cursor: move;
+            font-size: 2rem;
+            max-width: 60px;
+            max-height: 60px;
+            user-select: none;
+        }
+
+        .notebook-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            gap: 8px;
+        }
+
+        .notebook-page-indicator {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--neon-cyan);
+            letter-spacing: 1px;
+        }
+
+        .picsart-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #e01e5a, #d0006f);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            text-decoration: none;
+            font-weight: 600;
+            text-align: center;
+            margin-top: 6px;
+            box-shadow: 0 0 10px rgba(224, 30, 90, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -424,10 +534,10 @@
             <p>Sanctuary &amp; Reflection</p>
         </header>
 
-        <!-- Font Customization Module -->
+        <!-- Global Font Customization Module -->
         <div class="glam-card">
-            <h2><span>✦</span> Custom Typography</h2>
-            <p style="font-size: 0.75rem; color: var(--text-muted);">Choose your personal journal font:</p>
+            <h2><span>✦</span> Global App Font</h2>
+            <p style="font-size: 0.75rem; color: var(--text-muted);">Choose main app font (cards, input fields, logs):</p>
             <select id="fontSelect" onchange="changeAppFont(this.value)">
                 <option value="'Plus Jakarta Sans', sans-serif">Modern Glam (Plus Jakarta)</option>
                 <option value="'Cinzel', serif">Royal Noir (Cinzel)</option>
@@ -456,11 +566,11 @@
         <!-- Music & Audio Vibe Player Module -->
         <div class="glam-card">
             <h2><span>✦</span> Music &amp; Ambiance</h2>
-            <p style="font-size: 0.75rem; color: var(--text-muted);">Play background audio while journaling:</p>
+            <p style="font-size: 0.75rem; color: var(--text-muted);">Play main background audio while journaling:</p>
             <div class="audio-controls">
                 <audio id="bgAudioPlayer" controls loop></audio>
                 <label class="theme-upload-btn" style="display: block; text-align: center;">
-                    🎵 Upload Song / Audio File
+                    🎵 Upload Main Song / Audio File
                     <input type="file" id="musicInput" accept="audio/*" onchange="handleAudioUpload(event)">
                 </label>
             </div>
@@ -507,9 +617,9 @@
             </div>
             <button class="btn-secondary" onclick="generatePrompt()">New Prompt</button>
             
-            <!-- Stickers Tray -->
+            <!-- Global Stickers Tray -->
             <div style="margin-top: 12px;">
-                <p style="font-size: 0.75rem; color: var(--text-muted);">Tap a sticker to add to your entry:</p>
+                <p style="font-size: 0.75rem; color: var(--text-muted);">Tap a sticker to add to your entry text:</p>
                 <div class="sticker-tray" id="stickerTray">
                     <span class="sticker-item" onclick="addStickerToJournal('👑')">👑</span>
                     <span class="sticker-item" onclick="addStickerToJournal('💋')">💋</span>
@@ -521,10 +631,15 @@
                     <span class="sticker-item" onclick="addStickerToJournal('💖')">💖</span>
                 </div>
                 
-                <label class="btn-secondary" style="display: inline-block; margin-top: 8px;">
-                    🖼 Upload PicsArt Custom Sticker
-                    <input type="file" id="stickerInput" accept="image/*" onchange="uploadCustomSticker(event)">
-                </label>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
+                    <a href="https://picsart.com/sticker" target="_blank" class="picsart-btn">
+                        🎨 Browse PicsArt Stickers
+                    </a>
+                    <label class="btn-secondary" style="display: inline-block; margin: 0;">
+                        🖼 Upload Custom Sticker
+                        <input type="file" id="stickerInput" accept="image/*" onchange="uploadCustomSticker(event)">
+                    </label>
+                </div>
             </div>
 
             <textarea id="journalEntry" rows="4" placeholder="Write freely here..."></textarea>
@@ -551,6 +666,85 @@
             <h2><span>✦</span> Journal History</h2>
             <div id="entriesFeed"></div>
         </div>
+
+        <!-- ============================================================== -->
+        <!-- NEW BOTTOM MODULE: INTERACTIVE COLLEGE-RULED DIGITAL NOTEBOOK  -->
+        <!-- ============================================================== -->
+        <div class="glam-card" id="collegeNotebookSection">
+            <h2><span>✦</span> Interactive Lined Notebook</h2>
+            <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 12px;">
+                A realistic college-ruled notebook with page turning, custom page fonts, music, and stickers.
+            </p>
+
+            <!-- Page Navigation Controls -->
+            <div class="notebook-nav">
+                <button class="btn-secondary" onclick="prevNotebookPage()">◀ Prev Page</button>
+                <span class="notebook-page-indicator" id="notebookPageNum">Page 1 of 1</span>
+                <button class="btn-secondary" onclick="nextNotebookPage()">Next Page ▶</button>
+                <button class="tracker-btn-sub" onclick="addNotebookPage()">+ New Page</button>
+            </div>
+
+            <!-- Page-Specific Settings Panel: Font & Audio -->
+            <div style="margin-bottom: 12px; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 10px; display: flex; flex-direction: column; gap: 8px;">
+                <!-- Page Font Selector -->
+                <div>
+                    <p style="font-size: 0.72rem; color: var(--neon-cyan);">✍️ Font for THIS Page:</p>
+                    <select id="pageFontSelect" onchange="handlePageFontChange(this.value)" style="margin-top: 4px; font-size: 0.8rem; padding: 6px 10px;">
+                        <option value="'Caveat', cursive">Handwritten (Caveat)</option>
+                        <option value="'Great Vibes', cursive">Script &amp; Cursive (Great Vibes)</option>
+                        <option value="'Cinzel', serif">Royal Noir (Cinzel)</option>
+                        <option value="'Playfair Display', serif">Elegance (Playfair)</option>
+                        <option value="'Orbitron', sans-serif">Cyber Neon (Orbitron)</option>
+                        <option value="'Plus Jakarta Sans', sans-serif">Modern Glam (Plus Jakarta)</option>
+                    </select>
+                </div>
+
+                <!-- Page Audio Selector -->
+                <div>
+                    <p style="font-size: 0.72rem; color: var(--neon-cyan);">🎵 Soundtrack for THIS Page:</p>
+                    <audio id="pageAudioPlayer" controls style="margin-top: 4px; height: 32px;"></audio>
+                    <label class="theme-upload-btn" style="display: inline-block; margin-top: 6px; font-size: 0.7rem;">
+                        Upload Page Song
+                        <input type="file" id="pageMusicInput" accept="audio/*" onchange="handlePageAudioUpload(event)">
+                    </label>
+                </div>
+            </div>
+
+            <!-- Page Sticker Tray -->
+            <div style="margin-bottom: 12px;">
+                <p style="font-size: 0.72rem; color: var(--text-muted);">Tap a sticker to place on this lined page:</p>
+                <div class="sticker-tray" id="notebookStickerTray" style="padding: 8px;">
+                    <span class="sticker-item" onclick="attachStickerToNotebook('👑')">👑</span>
+                    <span class="sticker-item" onclick="attachStickerToNotebook('💋')">💋</span>
+                    <span class="sticker-item" onclick="attachStickerToNotebook('✨')">✨</span>
+                    <span class="sticker-item" onclick="attachStickerToNotebook('🦋')">🦋</span>
+                    <span class="sticker-item" onclick="attachStickerToNotebook('🌙')">🌙</span>
+                    <span class="sticker-item" onclick="attachStickerToNotebook('✝️')">✝️</span>
+                    <span class="sticker-item" onclick="attachStickerToNotebook('💄')">💄</span>
+                    <span class="sticker-item" onclick="attachStickerToNotebook('💖')">💖</span>
+                </div>
+                <div style="display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap;">
+                    <a href="https://picsart.com/sticker" target="_blank" class="picsart-btn" style="padding: 6px 10px; font-size: 0.7rem;">
+                        🎨 PicsArt Stickers
+                    </a>
+                    <label class="btn-secondary" style="font-size: 0.7rem; padding: 6px 10px; margin: 0;">
+                        🖼 Upload Sticker to Page
+                        <input type="file" id="pageStickerInput" accept="image/*" onchange="handlePageStickerUpload(event)">
+                    </label>
+                </div>
+            </div>
+
+            <!-- Actual Lined Paper Container -->
+            <div class="notebook-container">
+                <div class="notebook-page-paper">
+                    <div class="notebook-sticker-layer" id="notebookStickerLayer"></div>
+                    <textarea id="notebookText" class="notebook-textarea" placeholder="Start writing on the college-ruled lines..." oninput="saveCurrentNotebookPage()"></textarea>
+                </div>
+            </div>
+
+            <button class="btn-primary" style="margin-top: 14px;" onclick="saveCurrentNotebookPage(true)">Save Notebook Page</button>
+        </div>
+
     </div>
 
     <script>
@@ -561,6 +755,7 @@
             loadSavedMedia();
             loadCustomStickers();
             renderEntries();
+            initNotebook();
         });
 
         // 1. Font Selector Logic
@@ -784,16 +979,211 @@
             `).join('');
         }
 
-        // 9. Export to Google Drive & Local Storage
+        // ==============================================================
+        // 9. INTERACTIVE COLLEGE-RULED NOTEBOOK LOGIC (WITH PAGE FONTS)
+        // ==============================================================
+        let notebookPages = [];
+        let currentNotebookIndex = 0;
+
+        function initNotebook() {
+            const saved = localStorage.getItem("glam_notebook_pages");
+            if (saved) {
+                notebookPages = JSON.parse(saved);
+            }
+            if (!notebookPages || notebookPages.length === 0) {
+                notebookPages = [{
+                    text: "",
+                    font: "'Caveat', cursive",
+                    audioSrc: "",
+                    stickers: []
+                }];
+            }
+            renderNotebookPage(0);
+        }
+
+        function renderNotebookPage(index) {
+            if (index < 0 || index >= notebookPages.length) return;
+            currentNotebookIndex = index;
+
+            const page = notebookPages[currentNotebookIndex];
+
+            // Load text & font choice
+            const notebookArea = document.getElementById("notebookText");
+            notebookArea.value = page.text || "";
+            
+            const pageFont = page.font || "'Caveat', cursive";
+            notebookArea.style.fontFamily = pageFont;
+            document.getElementById("pageFontSelect").value = pageFont;
+
+            document.getElementById("notebookPageNum").innerText = `Page ${currentNotebookIndex + 1} of ${notebookPages.length}`;
+
+            // Load audio choice
+            const audioPlayer = document.getElementById("pageAudioPlayer");
+            if (page.audioSrc) {
+                audioPlayer.src = page.audioSrc;
+            } else {
+                audioPlayer.src = "";
+            }
+
+            renderNotebookStickers(page.stickers || []);
+        }
+
+        function handlePageFontChange(font) {
+            document.getElementById("notebookText").style.fontFamily = font;
+            if (notebookPages[currentNotebookIndex]) {
+                notebookPages[currentNotebookIndex].font = font;
+                saveCurrentNotebookPage();
+            }
+        }
+
+        function saveCurrentNotebookPage(showNotification = false) {
+            if (!notebookPages[currentNotebookIndex]) return;
+
+            notebookPages[currentNotebookIndex].text = document.getElementById("notebookText").value;
+            notebookPages[currentNotebookIndex].font = document.getElementById("pageFontSelect").value;
+            
+            localStorage.setItem("glam_notebook_pages", JSON.stringify(notebookPages));
+
+            if (showNotification) {
+                alert(`Page ${currentNotebookIndex + 1} Saved!`);
+            }
+        }
+
+        function prevNotebookPage() {
+            saveCurrentNotebookPage();
+            if (currentNotebookIndex > 0) {
+                renderNotebookPage(currentNotebookIndex - 1);
+            }
+        }
+
+        function nextNotebookPage() {
+            saveCurrentNotebookPage();
+            if (currentNotebookIndex < notebookPages.length - 1) {
+                renderNotebookPage(currentNotebookIndex + 1);
+            }
+        }
+
+        function addNotebookPage() {
+            saveCurrentNotebookPage();
+            notebookPages.push({
+                text: "",
+                font: "'Caveat', cursive",
+                audioSrc: "",
+                stickers: []
+            });
+            renderNotebookPage(notebookPages.length - 1);
+        }
+
+        function handlePageAudioUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const src = e.target.result;
+                notebookPages[currentNotebookIndex].audioSrc = src;
+                const audioPlayer = document.getElementById("pageAudioPlayer");
+                audioPlayer.src = src;
+                audioPlayer.play();
+                saveCurrentNotebookPage();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function attachStickerToNotebook(stickerContent) {
+            if (!notebookPages[currentNotebookIndex].stickers) {
+                notebookPages[currentNotebookIndex].stickers = [];
+            }
+
+            const top = Math.floor(Math.random() * 200) + 20;
+            const left = Math.floor(Math.random() * 200) + 20;
+
+            notebookPages[currentNotebookIndex].stickers.push({
+                content: stickerContent,
+                isImage: false,
+                top: top,
+                left: left
+            });
+
+            saveCurrentNotebookPage();
+            renderNotebookStickers(notebookPages[currentNotebookIndex].stickers);
+        }
+
+        function handlePageStickerUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const src = e.target.result;
+                if (!notebookPages[currentNotebookIndex].stickers) {
+                    notebookPages[currentNotebookIndex].stickers = [];
+                }
+
+                const top = Math.floor(Math.random() * 180) + 20;
+                const left = Math.floor(Math.random() * 180) + 20;
+
+                notebookPages[currentNotebookIndex].stickers.push({
+                    content: src,
+                    isImage: true,
+                    top: top,
+                    left: left
+                });
+
+                saveCurrentNotebookPage();
+                renderNotebookStickers(notebookPages[currentNotebookIndex].stickers);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function renderNotebookStickers(stickers) {
+            const layer = document.getElementById("notebookStickerLayer");
+            layer.innerHTML = "";
+
+            stickers.forEach((st, idx) => {
+                const el = document.createElement("div");
+                el.className = "placed-sticker";
+                el.style.top = st.top + "px";
+                el.style.left = st.left + "px";
+
+                if (st.isImage) {
+                    const img = document.createElement("img");
+                    img.src = st.content;
+                    img.style.width = "48px";
+                    img.style.height = "48px";
+                    img.style.objectFit = "contain";
+                    el.appendChild(img);
+                } else {
+                    el.innerText = st.content;
+                }
+
+                el.title = "Tap to remove sticker";
+                el.onclick = function(e) {
+                    e.stopPropagation();
+                    if (confirm("Remove this sticker from the page?")) {
+                        notebookPages[currentNotebookIndex].stickers.splice(idx, 1);
+                        saveCurrentNotebookPage();
+                        renderNotebookStickers(notebookPages[currentNotebookIndex].stickers);
+                    }
+                };
+
+                layer.appendChild(el);
+            });
+        }
+
+        // 10. Export to Google Drive & Local Storage
         async function exportDataToCloudOrFiles() {
+            saveCurrentNotebookPage();
             const entries = localStorage.getItem("glam_entries") || "[]";
             const streak = localStorage.getItem("glam_streak") || "0";
+            const notebook = localStorage.getItem("glam_notebook_pages") || "[]";
 
             const backupData = {
                 appName: "GLAM NOIR JOURNAL",
                 exportDate: new Date().toISOString(),
                 streakDays: streak,
-                journalEntries: JSON.parse(entries)
+                journalEntries: JSON.parse(entries),
+                notebookPages: JSON.parse(notebook)
             };
 
             const dataString = JSON.stringify(backupData, null, 2);
@@ -822,7 +1212,7 @@
             }
         }
 
-        // 10. Import / Restore Backup File
+        // 11. Import / Restore Backup File
         function importDataFromFile(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -837,8 +1227,12 @@
                     if (data.streakDays) {
                         localStorage.setItem("glam_streak", data.streakDays);
                     }
+                    if (data.notebookPages) {
+                        localStorage.setItem("glam_notebook_pages", JSON.stringify(data.notebookPages));
+                    }
                     loadStreak();
                     renderEntries();
+                    initNotebook();
                     alert("Backup successfully imported and restored!");
                 } catch (err) {
                     alert("Invalid backup file format.");
@@ -849,3 +1243,5 @@
     </script>
 </body>
 </html>
+
+```
