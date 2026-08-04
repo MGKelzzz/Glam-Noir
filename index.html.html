@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GLAM NOIR — Digital Journal</title>
+  <style>
+    :root {
+      --bg-dark: #121212;
+      --accent-gold: #d4af37;
+      --drawer-bg: #1c1c1e;
+      --canvas-bg: #1e1e24;
+      --text-main: #f0f0f0;
+      --font-main: 'Georgia', serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-main);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* 1. PIN LOCK GATE */
+    #security-gate {
+      position: fixed;
+      inset: 0;
+      background: var(--bg-dark);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pin-box {
+      background: var(--drawer-bg);
+      padding: 2rem;
+      border-radius: 12px;
+      border: 1px solid var(--accent-gold);
+      text-align: center;
+    }
+
+    .pin-box input {
+      padding: 10px;
+      margin-top: 15px;
+      font-size: 1.2rem;
+      text-align: center;
+      width: 120px;
+      border-radius: 6px;
+      border: none;
+    }
+
+    /* 2. SLIDING MENU DRAWER */
+    #sliding-drawer {
+      position: fixed;
+      top: 0;
+      left: -320px;
+      width: 320px;
+      height: 100%;
+      background: var(--drawer-bg);
+      border-right: 1px solid #333;
+      transition: left 0.3s ease;
+      z-index: 1000;
+      padding: 2rem 1rem;
+      overflow-y: auto;
+    }
+
+    #sliding-drawer.open { left: 0; }
+
+    .menu-toggle-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 1001;
+      background: var(--accent-gold);
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .nav-section { margin-bottom: 1.5rem; }
+    .nav-section h3 { color: var(--accent-gold); font-size: 0.9rem; text-transform: uppercase; margin-bottom: 0.5rem; }
+    .nav-section ul { list-style: none; }
+    .nav-section li { padding: 8px 0; cursor: pointer; border-bottom: 1px solid #2a2a2a; }
+    .nav-section li:hover { color: var(--accent-gold); }
+
+    /* 3. MAIN WORKSPACE / CANVAS CONTAINER */
+    #workspace {
+      height: 100vh;
+      width: 100vw;
+      padding: 80px 40px 40px 40px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .canvas-page {
+      background: var(--canvas-bg);
+      width: 100%;
+      max-width: 900px;
+      height: 100%;
+      border-radius: 8px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      position: relative;
+      padding: 40px;
+      overflow-y: auto;
+    }
+
+    /* Canvas Text Area */
+    .editable-area {
+      width: 100%;
+      height: 100%;
+      outline: none;
+      font-size: 1.1rem;
+      line-height: 1.8;
+    }
+
+    /* Floating Sticker Layer Container */
+    #sticker-layer {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Security Gate Overlay -->
+  <div id="security-gate">
+    <div class="pin-box">
+      <h2>GLAM NOIR</h2>
+      <p>Enter PIN to Unlock</p>
+      <input type="password" id="pin-input" maxlength="4" placeholder="••••">
+    </div>
+  </div>
+
+  <!-- Navigation Toggle -->
+  <button class="menu-toggle-btn" onclick="toggleDrawer()">☰ Menu</button>
+
+  <!-- Sliding Drawer Navigation -->
+  <nav id="sliding-drawer">
+    <h2 style="margin-bottom: 1.5rem;">GLAM NOIR</h2>
+    
+    <div class="nav-section">
+      <h3>Modules</h3>
+      <ul>
+        <li onclick="switchView('canvas')">📓 Full-Page Canvas</li>
+        <li onclick="switchView('productivity')">📅 Productivity & Schedule</li>
+        <li onclick="switchView('hustle')">💡 Hustle Helper (AI)</li>
+        <li onclick="switchView('feline')">🐾 Feline Log</li>
+        <li onclick="switchView('relationships')">🫂 Inner Circle Directory</li>
+        <li onclick="switchView('prompts')">🌱 Deep Growth Prompts</li>
+        <li onclick="switchView('recovery')">🕊️ Recovery & HALT</li>
+        <li onclick="switchView('resolution')">🧩 Challenge Resolution</li>
+      </ul>
+    </div>
+
+    <div class="nav-section">
+      <h3>Settings</h3>
+      <ul>
+        <li>🎨 Themes & Page Styles</li>
+        <li>🏷️ Section Relabeling</li>
+        <li>💾 Export / Backup Data</li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Main Workspace -->
+  <main id="workspace">
+    <div class="canvas-page" id="active-canvas">
+      <!-- Interactive Content Area -->
+      <div class="editable-area" contenteditable="true" placeholder="Begin writing...">
+        Welcome to your sanctuary...
+      </div>
+      
+      <!-- Interactive Sticker Canvas Layer -->
+      <div id="sticker-layer"></div>
+    </div>
+  </main>
+
+  <script>
+    // Security Gate Check
+    const pinInput = document.getElementById('pin-input');
+    pinInput.addEventListener('input', (e) => {
+      if (e.target.value === '1234') { // Example PIN
+        document.getElementById('security-gate').style.display = 'none';
+      }
+    });
+
+    // Drawer Toggle Functionality
+    function toggleDrawer() {
+      document.getElementById('sliding-drawer').classList.toggle('open');
+    }
+
+    // View Switching Logic Architecture
+    function switchView(viewName) {
+      console.log(`Switching view to: ${viewName}`);
+      toggleDrawer();
+      // View switching dynamically mounts components into #active-canvas
+    }
+  </script>
+</body>
+</html>
