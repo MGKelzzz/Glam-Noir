@@ -135,8 +135,9 @@
   <div id="security-gate">
     <div class="pin-box">
       <h2>GLAM NOIR</h2>
-      <p>Enter PIN to Unlock</p>
+      <p id="pin-prompt-text">Enter PIN to Unlock</p>
       <input type="password" id="pin-input" maxlength="4" placeholder="••••">
+      <button id="reset-pin-btn" style="margin-top:10px; display:none;" onclick="resetPin()">Reset PIN</button>
     </div>
   </div>
 
