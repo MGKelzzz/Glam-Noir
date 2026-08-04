@@ -55,6 +55,22 @@
       border: none;
     }
 
+    #reset-pin-btn {
+        margin-top: 15px;
+        background: transparent;
+        color: #888;
+        border: 1px solid #555;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.8rem;
+    }
+    
+    #reset-pin-btn:hover {
+        color: var(--text-main);
+        border-color: var(--text-main);
+    }
+
     /* 2. SLIDING MENU DRAWER */
     #sliding-drawer {
       position: fixed;
@@ -135,9 +151,11 @@
   <div id="security-gate">
     <div class="pin-box">
       <h2>GLAM NOIR</h2>
-      <p id="pin-prompt-text">Enter PIN to Unlock</p>
+      <!-- Changed p tag to have an ID so we can update the text -->
+      <p id="pin-prompt-text">Checking security...</p>
       <input type="password" id="pin-input" maxlength="4" placeholder="••••">
-      <button id="reset-pin-btn" style="margin-top:10px; display:none;" onclick="resetPin()">Reset PIN</button>
+      <!-- Added a reset button, hidden by default -->
+      <button id="reset-pin-btn" style="display:none;" onclick="resetPin()">Reset PIN</button>
     </div>
   </div>
 
@@ -186,24 +204,59 @@
   </main>
 
   <script>
-    // Security Gate Check
+    // --- PIN LOGIC ---
     const pinInput = document.getElementById('pin-input');
-    pinInput.addEventListener('input', (e) => {
-      if (e.target.value === '1234') { // Example PIN
-        document.getElementById('security-gate').style.display = 'none';
-      }
-    });
+    const promptText = document.getElementById('pin-prompt-text');
+    const resetBtn = document.getElementById('reset-pin-btn');
 
-    // Drawer Toggle Functionality
+    // Check if a PIN already exists in localStorage
+    let savedPin = localStorage.getItem('glamNoirPin');
+
+    if (!savedPin) {
+      // Setup Mode: No PIN found, ask the user to create one
+      promptText.textContent = "Create a 4-Digit PIN";
+      pinInput.addEventListener('input', (e) => {
+        if (e.target.value.length === 4) {
+          localStorage.setItem('glamNoirPin', e.target.value);
+          document.getElementById('security-gate').style.display = 'none';
+        }
+      });
+    } else {
+      // Unlock Mode: PIN exists, ask the user to enter it
+      promptText.textContent = "Enter PIN to Unlock";
+      resetBtn.style.display = 'inline-block'; // Show reset option just in case
+      
+      pinInput.addEventListener('input', (e) => {
+        if (e.target.value === savedPin) {
+          document.getElementById('security-gate').style.display = 'none';
+        } else if (e.target.value.length === 4) {
+          // Incorrect PIN entered
+          promptText.textContent = "Incorrect PIN. Try again.";
+          promptText.style.color = "#ff6b6b"; // A soft red
+          setTimeout(() => { 
+              e.target.value = ''; 
+              promptText.textContent = "Enter PIN to Unlock";
+              promptText.style.color = "var(--text-main)";
+          }, 1000); // Clear input and reset text after 1 second
+        }
+      });
+    }
+
+    // Bypass/Reset function for testing purposes
+    function resetPin() {
+      localStorage.removeItem('glamNoirPin');
+      location.reload(); // Reload the page to trigger setup mode
+    }
+
+    // --- DRAWER LOGIC ---
     function toggleDrawer() {
       document.getElementById('sliding-drawer').classList.toggle('open');
     }
 
-    // View Switching Logic Architecture
     function switchView(viewName) {
       console.log(`Switching view to: ${viewName}`);
       toggleDrawer();
-      // View switching dynamically mounts components into #active-canvas
+      // Future logic: View switching dynamically mounts components into #active-canvas
     }
   </script>
 </body>
